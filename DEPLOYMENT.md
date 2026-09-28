@@ -73,11 +73,11 @@ If configuring manually via the Render UI:
 3. Import your Forge Git repository.
 4. In the **Configure Project** screen:
    - **Framework Preset**: `Vite`
-   - **Root Directory**: Click **Edit** and select `frontend` (or leave as root; the included `vercel.json` supports both).
+   - **Root Directory**: Click **Edit** and select `frontend`
    - **Build and Output Settings**:
-     - Build Command: `npm run build`
-     - Output Directory: `dist`
-     - Install Command: `npm install`
+     - Build Command: `npm run build` (or leave default)
+     - Output Directory: `dist` (or leave default)
+     - Install Command: `npm install` (or leave default)
 5. Expand **Environment Variables** and add:
    | Key | Value | Description |
    | :--- | :--- | :--- |
