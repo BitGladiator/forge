@@ -7,10 +7,9 @@ interface AuthContextType {
   role: UserRole;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<User>;
+  register: (data: RegisterData) => Promise<User>;
   logout: () => Promise<void>;
-  switchRole: (role: UserRole) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,34 +19,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    let isMounted = true;
     async function initAuth() {
       try {
         const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
+        if (isMounted) {
+          setUser(currentUser);
+        }
       } catch (err) {
-        console.error('Failed to load current user', err);
+        if (isMounted) {
+          setUser(null);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
     initAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (credentials: LoginCredentials): Promise<User> => {
     setIsLoading(true);
     try {
       const session = await authService.login(credentials);
       setUser(session.user);
+      return session.user;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (data: RegisterData) => {
+  const register = async (data: RegisterData): Promise<User> => {
     setIsLoading(true);
     try {
       const session = await authService.register(data);
       setUser(session.user);
+      return session.user;
     } finally {
       setIsLoading(false);
     }
@@ -63,11 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const switchRole = (newRole: UserRole) => {
-    const updated = authService.setSimulatedRole(newRole);
-    setUser(updated);
-  };
-
+  // Role and authentication state are derived strictly from backend identity
   const role: UserRole = user ? user.role : 'visitor';
   const isAuthenticated = user !== null && user.role !== 'visitor';
 
@@ -81,7 +89,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
-        switchRole,
       }}
     >
       {children}

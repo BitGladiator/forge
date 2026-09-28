@@ -132,7 +132,9 @@ def register():
     name = data.get('name', '').strip()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
-    role = data.get('role', 'participant')
+    # Security: Public registration always creates participant accounts.
+    # Organizers, judges, and admins cannot be created via public registration.
+    role = 'participant'
 
     if not name or not email or not password:
         return jsonify({"error": "Name, email, and password are required"}), 400

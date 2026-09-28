@@ -129,5 +129,63 @@ class ForgeBackendTestCase(unittest.TestCase):
         self.assertIn('weight', data[0])
         self.assertIn('maxScore', data[0])
 
+    # 6. End-to-End Registration & Role Security Tests
+    def test_registration_enforces_participant_role(self):
+        # Even if request attempts to register as admin or organizer, must enforce participant
+        resp = self.client.post('/api/auth/register', json={
+            'name': 'Hacker Participant',
+            'email': 'hacker@example.com',
+            'password': 'password123',
+            'role': 'admin' # Malicious injection attempt
+        })
+        self.assertEqual(resp.status_code, 201)
+        data = json.loads(resp.data.decode('utf-8'))
+        self.assertEqual(data['user']['role'], 'participant')
+        token = data['token']
+
+        # Verify /api/auth/me confirms participant role
+        me_resp = self.client.get('/api/auth/me', headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(me_resp.status_code, 200)
+        me_data = json.loads(me_resp.data.decode('utf-8'))
+        self.assertEqual(me_data['role'], 'participant')
+
+    def test_registration_validation(self):
+        resp = self.client.post('/api/auth/register', json={
+            'name': '',
+            'email': 'missing@example.com',
+            'password': ''
+        })
+        self.assertEqual(resp.status_code, 400)
+
+    def test_role_enforcement_matrix(self):
+        # Participant cannot access organizer endpoints
+        p_resp = self.client.get('/api/organizer/overview', headers={'Authorization': f'Bearer {self.part_token}'})
+        self.assertEqual(p_resp.status_code, 403)
+
+        # Participant cannot access judge endpoints
+        pj_resp = self.client.get('/api/judge/assignments', headers={'Authorization': f'Bearer {self.part_token}'})
+        self.assertEqual(pj_resp.status_code, 403)
+
+        # Judge cannot access organizer endpoints
+        j_resp = self.client.get('/api/organizer/overview', headers={'Authorization': f'Bearer {self.judge_a_token}'})
+        self.assertEqual(j_resp.status_code, 403)
+
+        # Judge cannot access admin endpoints
+        ja_resp = self.client.get('/api/admin/overview', headers={'Authorization': f'Bearer {self.judge_a_token}'})
+        self.assertEqual(ja_resp.status_code, 403)
+
+        # Organizer cannot access admin endpoints
+        oa_resp = self.client.get('/api/admin/overview', headers={'Authorization': f'Bearer {self.org_token}'})
+        self.assertEqual(oa_resp.status_code, 403)
+
+        # Admin CAN access admin endpoints
+        admin_token = 'forge_admin_token_2026'
+        adm_resp = self.client.get('/api/admin/overview', headers={'Authorization': f'Bearer {admin_token}'})
+        self.assertEqual(adm_resp.status_code, 200)
+
+        # Invalid token is rejected on /api/auth/me
+        bad_resp = self.client.get('/api/auth/me', headers={'Authorization': 'Bearer invalid_bogus_token'})
+        self.assertEqual(bad_resp.status_code, 401)
+
 if __name__ == '__main__':
     unittest.main()

@@ -84,6 +84,10 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
     }
 
     if (!response.ok) {
+      if (response.status === 401 && !endpoint.includes('/auth/login')) {
+        localStorage.removeItem('forge_token');
+        localStorage.removeItem('forge_user');
+      }
       const message = responseData?.message || responseData?.error || `Request failed with status ${response.status}`;
       throw new ApiError(response.status, message, responseData);
     }
