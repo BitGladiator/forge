@@ -1,0 +1,18 @@
+# DOGFOOD 2026 Hackathon Platform Configuration
+[portal]
+url = "http://localhost:8000"
+claimed_tiers = ["T1", "T2"]
+pitch = "Forge is an open-source, self-hostable platform for hackathon submissions and judging."
+
+[auth]
+organizer_header = "Bearer forge_organizer_token_2026"
+judge_a_header = "Bearer forge_judge_a_token_2026"
+judge_b_header = "Bearer forge_judge_b_token_2026"
+participant_header = "Bearer forge_participant_token_2026"
+
+[routes]
+gallery = "/api/projects"
+submission = "/api/projects"
+judge_scores = "/api/judge/scores"
+peer_scores = "/api/judge/scores?judge=jdg_a"
+csv_export = "/api/organizer/export/csv"

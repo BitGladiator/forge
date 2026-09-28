@@ -1,0 +1,283 @@
+{
+  "event": {
+    "id": "evt_dogfood_2026",
+    "name": "DOGFOOD 2026 Hackathon",
+    "tagline": "Engineering the next generation of developer infrastructure",
+    "submissions_open": false,
+    "submissions_close": "2026-09-20T23:59:59Z",
+    "tracks": [
+      "Infrastructure",
+      "Developer Tools",
+      "Security",
+      "AI & Data"
+    ]
+  },
+  "users": [
+    {
+      "id": "usr_org",
+      "name": "Marcus Sterling",
+      "email": "organizer@forge.internal",
+      "role": "organizer",
+      "token": "forge_organizer_token_2026"
+    },
+    {
+      "id": "jdg_a",
+      "name": "Dr. Evelyn Vance",
+      "email": "judge_a@forge.internal",
+      "role": "judge",
+      "token": "forge_judge_a_token_2026"
+    },
+    {
+      "id": "jdg_b",
+      "name": "Arthur Pendelton",
+      "email": "judge_b@forge.internal",
+      "role": "judge",
+      "token": "forge_judge_b_token_2026"
+    },
+    {
+      "id": "usr_part",
+      "name": "Alex Rivera",
+      "email": "participant@forge.internal",
+      "role": "participant",
+      "token": "forge_participant_token_2026",
+      "team_id": "team_aurora"
+    }
+  ],
+  "teams": [
+    {
+      "id": "team_aurora",
+      "name": "Aurora Systems",
+      "invite_code": "AURORA-2026",
+      "leader_id": "usr_part",
+      "members": [
+        {
+          "id": "usr_part",
+          "name": "Alex Rivera",
+          "email": "participant@forge.internal",
+          "role": "leader"
+        }
+      ]
+    },
+    {
+      "id": "team_nexus",
+      "name": "Nexus Dynamics",
+      "invite_code": "NEXUS-778",
+      "leader_id": "usr_p4",
+      "members": [
+        {
+          "id": "usr_p4",
+          "name": "Liam Chen",
+          "email": "liam.chen@example.com",
+          "role": "leader"
+        }
+      ]
+    }
+  ],
+  "rubric": [
+    {
+      "id": "crit_tech_execution",
+      "name": "Technical Execution & Architecture",
+      "description": "Depth of engineering complexity, code quality, robustness, and architectural soundness.",
+      "weight": 0.35,
+      "max_score": 5
+    },
+    {
+      "id": "crit_originality",
+      "name": "Originality & Technical Innovation",
+      "description": "Novelty of approach, uniqueness of the problem solved, and creative problem solving.",
+      "weight": 0.25,
+      "max_score": 5
+    },
+    {
+      "id": "crit_completeness",
+      "name": "Completeness & Functionality",
+      "description": "Degree to which the core technical prototype works, edge cases handled, and demo reliability.",
+      "weight": 0.25,
+      "max_score": 5
+    },
+    {
+      "id": "crit_presentation",
+      "name": "Clarity & Engineering Presentation",
+      "description": "Quality of technical documentation, architectural diagrams, and clarity of the demo.",
+      "weight": 0.15,
+      "max_score": 5
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj_1",
+      "title": "KubePulse: Lightweight Distributed Telemetry for Edge Nodes",
+      "summary": "Real-time telemetry and health monitoring agent optimized for resource-constrained edge computing environments.",
+      "description": "KubePulse collects, correlates, and aggregates node metrics with less than 15MB memory footprint. Uses eBPF for zero-overhead syscall interception and streaming gRPC back to central collector.",
+      "track": "Infrastructure",
+      "team_id": "team_aurora",
+      "team_name": "Aurora Systems",
+      "repository_url": "https://github.com/aurora-systems/kubepulse",
+      "demo_url": "https://kubepulse-demo.example.internal",
+      "submission_status": "submitted",
+      "submitted_at": "2026-09-20T18:45:00Z"
+    },
+    {
+      "id": "proj_2",
+      "title": "AegisDB: Deterministic Time-Travel Database Engine",
+      "summary": "Embedded transactional database engine supporting point-in-time branch queries and cryptographic audit proofs.",
+      "description": "AegisDB implements immutable append-only storage with persistent trees to offer microsecond time-travel queries across historical transactions. Features zero-copy snapshots and automatic compaction.",
+      "track": "Developer Tools",
+      "team_id": "team_nexus",
+      "team_name": "Nexus Dynamics",
+      "repository_url": "https://github.com/nexus-dynamics/aegis-db",
+      "demo_url": "https://aegisdb.example.internal",
+      "submission_status": "submitted",
+      "submitted_at": "2026-09-20T19:10:00Z"
+    },
+    {
+      "id": "proj_3",
+      "title": "SpectraTrace: Autonomous API Vulnerability Fuzzer",
+      "summary": "Self-adapting grammar-guided fuzzer targeting GraphQL and OpenAPI service endpoints.",
+      "description": "SpectraTrace combines static schema analysis with dynamic feedback loops to detect race conditions, IDOR weaknesses, and broken object level authorization across microservice ecosystems.",
+      "track": "Security",
+      "team_id": "team_spectra",
+      "team_name": "Spectra Lab",
+      "repository_url": "https://github.com/spectra-lab/spectratrace",
+      "demo_url": "https://spectratrace.example.internal",
+      "submission_status": "submitted",
+      "submitted_at": "2026-09-20T20:00:00Z"
+    },
+    {
+      "id": "proj_4",
+      "title": "VoxelFlow: Streaming 3D Gaussian Splatting Renderer",
+      "summary": "WebGPU-based client-side progressive volumetric reconstruction engine for web browsers.",
+      "description": "VoxelFlow streams hierarchical scene partitions using octrees and evaluates 3D Gaussian radiance fields directly in compute shaders at 60 FPS without external native plugins.",
+      "track": "AI & Data",
+      "team_id": "team_voxel",
+      "team_name": "VoxelFlow Collective",
+      "repository_url": "https://github.com/voxelflow/voxelflow-webgpu",
+      "demo_url": "https://voxelflow.example.internal",
+      "submission_status": "submitted",
+      "submitted_at": "2026-09-20T21:15:00Z"
+    },
+    {
+      "id": "proj_5",
+      "title": "ByteBridge: Zero-Copy IPC Transport for Heterogeneous Subsystems",
+      "summary": "Ultra-low latency shared-memory transport mechanism for polyglot micro-kernels.",
+      "description": "Provides lockless ring buffers with cache-aligned message headers enabling sub-microsecond roundtrip IPC across Rust, Go, and C++ processes running on Linux and Darwin.",
+      "track": "Infrastructure",
+      "team_id": "team_bytebridge",
+      "team_name": "Kernel Crew",
+      "repository_url": "https://github.com/kernelcrew/bytebridge",
+      "demo_url": "https://bytebridge.example.internal",
+      "submission_status": "under_review",
+      "submitted_at": "2026-09-20T22:00:00Z"
+    },
+    {
+      "id": "proj_6",
+      "title": "CodeSentinel: Static Concurrency Deadlock Detector",
+      "summary": "Symbolic execution tool specifically detecting channel leaks and deadlock cycles in asynchronous applications.",
+      "description": "CodeSentinel builds abstract interpretation control-flow graphs to pinpoint thread contention and lock ordering violations prior to deployment.",
+      "track": "Developer Tools",
+      "team_id": "team_sentinel",
+      "team_name": "Sentinel Systems",
+      "repository_url": "https://github.com/sentinelsys/codesentinel",
+      "demo_url": "https://codesentinel.example.internal",
+      "submission_status": "submitted",
+      "submitted_at": "2026-09-20T22:30:00Z"
+    }
+  ],
+  "assignments": [
+    {
+      "id": "asgn_1",
+      "judge_id": "jdg_a",
+      "project_id": "proj_1",
+      "status": "completed"
+    },
+    {
+      "id": "asgn_2",
+      "judge_id": "jdg_a",
+      "project_id": "proj_2",
+      "status": "completed"
+    },
+    {
+      "id": "asgn_3",
+      "judge_id": "jdg_b",
+      "project_id": "proj_2",
+      "status": "completed"
+    },
+    {
+      "id": "asgn_4",
+      "judge_id": "jdg_b",
+      "project_id": "proj_4",
+      "status": "completed"
+    },
+    {
+      "id": "asgn_5",
+      "judge_id": "jdg_a",
+      "project_id": "proj_3",
+      "status": "assigned"
+    }
+  ],
+  "scores": [
+    {
+      "judge_id": "jdg_a",
+      "project_id": "proj_1",
+      "criterion_id": "crit_tech_execution",
+      "score": 4.8,
+      "comment": "Exemplary eBPF implementation."
+    },
+    {
+      "judge_id": "jdg_a",
+      "project_id": "proj_1",
+      "criterion_id": "crit_originality",
+      "score": 4.5,
+      "comment": "Smart telemetry architecture."
+    },
+    {
+      "judge_id": "jdg_a",
+      "project_id": "proj_1",
+      "criterion_id": "crit_completeness",
+      "score": 4.6,
+      "comment": "Demonstration was solid and reproducible."
+    },
+    {
+      "judge_id": "jdg_a",
+      "project_id": "proj_1",
+      "criterion_id": "crit_presentation",
+      "score": 4.2,
+      "comment": "Clear technical specs and docs."
+    },
+    {
+      "judge_id": "jdg_a",
+      "project_id": "proj_2",
+      "criterion_id": "crit_tech_execution",
+      "score": 4.4,
+      "comment": "Persistent tree structure is robust."
+    },
+    {
+      "judge_id": "jdg_a",
+      "project_id": "proj_2",
+      "criterion_id": "crit_originality",
+      "score": 4.2,
+      "comment": "Good time-travel concepts."
+    },
+    {
+      "judge_id": "jdg_b",
+      "project_id": "proj_2",
+      "criterion_id": "crit_tech_execution",
+      "score": 4.1,
+      "comment": "Solid database implementation."
+    },
+    {
+      "judge_id": "jdg_b",
+      "project_id": "proj_2",
+      "criterion_id": "crit_originality",
+      "score": 4.0,
+      "comment": "Innovative transaction log approach."
+    },
+    {
+      "judge_id": "jdg_b",
+      "project_id": "proj_4",
+      "criterion_id": "crit_tech_execution",
+      "score": 4.5,
+      "comment": "Impressive WebGPU shaders."
+    }
+  ]
+}
