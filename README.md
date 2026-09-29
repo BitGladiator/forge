@@ -5,6 +5,20 @@
 
 ---
 
+> [!IMPORTANT]
+> ### Hackathon Evaluation & Judge Login Credentials
+> All evaluation accounts share the standard password: **`forge2026`**
+>
+> | Role | Email | Password | Landing Page | Key Capabilities to Test |
+> | :--- | :--- | :--- | :--- | :--- |
+> | **Platform Admin** | `admin@forge.internal` | `forge2026` | `/admin` | Admin Console, system metrics, user roles |
+> | **Organizer** | `organizer@forge.internal` | `forge2026` | `/organizer` | Create Hackathons, rubric weights, assignments, live results, CSV export |
+> | **Judge A** | `judge_a@forge.internal` | `forge2026` | `/judge` | Assigned projects, dynamic rubric evaluation (1–5 scale), feedback |
+> | **Judge B** | `judge_b@forge.internal` | `forge2026` | `/judge` | Independent scoring, peer review isolation verification |
+> | **Participant** | `participant@forge.internal` | `forge2026` | `/dashboard` | Team roster, project submission, deadline enforcement |
+
+---
+
 ## 1. What is Forge?
 
 Forge is a reliable, developer-centric hackathon management platform providing complete Tier 1 + Tier 2 submission and judging workflows:
@@ -83,17 +97,17 @@ The database initializes automatically on startup from `fixtures.json`. You can 
 python3 backend/seed.py
 ```
 
-### Pre-Configured Test Accounts
+### Pre-Configured Test Accounts & API Tokens
 
-| Role | Email | Password | Pre-seeded API Bearer Token |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@forge.internal` | `forge2026` | `forge_admin_token_2026` |
-| **Organizer** | `organizer@forge.internal` | `forge2026` | `forge_organizer_token_2026` |
-| **Judge A** | `judge_a@forge.internal` | `forge2026` | `forge_judge_a_token_2026` |
-| **Judge B** | `judge_b@forge.internal` | `forge2026` | `forge_judge_b_token_2026` |
-| **Participant** | `participant@forge.internal` | `forge2026` | `forge_participant_token_2026` |
+| Role | Email | Password | Pre-seeded API Bearer Token | Default Route |
+| :--- | :--- | :--- | :--- | :--- |
+| **Admin** | `admin@forge.internal` | `forge2026` | `forge_admin_token_2026` | `/admin` |
+| **Organizer** | `organizer@forge.internal` | `forge2026` | `forge_organizer_token_2026` | `/organizer` |
+| **Judge A** | `judge_a@forge.internal` | `forge2026` | `forge_judge_a_token_2026` | `/judge` |
+| **Judge B** | `judge_b@forge.internal` | `forge2026` | `forge_judge_b_token_2026` | `/judge` |
+| **Participant** | `participant@forge.internal` | `forge2026` | `forge_participant_token_2026` | `/dashboard` |
 
-*Tip: Use the **Role Switcher** dropdown in the web navigation bar to instantly switch between active roles in real time.*
+*Note: All roles authenticate securely against the backend API (`/api/auth/login`). Upon signing in, users are automatically directed to their authorized dashboard.*
 
 ---
 

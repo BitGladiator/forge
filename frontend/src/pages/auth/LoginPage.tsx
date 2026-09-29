@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AlertCircle, Lock, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Lock } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
@@ -54,12 +54,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleFillDemo = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('forge2026');
-    setErrorMessage(null);
-  };
-
   return (
     <div className="max-w-md mx-auto">
       <Card className="border-zinc-800 bg-zinc-900/60 p-6 shadow-xl">
@@ -111,52 +105,7 @@ export const LoginPage: React.FC = () => {
           </Button>
         </form>
 
-        {/* Demo Credentials Quick-Fill for convenience */}
-        <div className="mt-6 pt-5 border-t border-zinc-800/80">
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-2.5">
-            <ShieldCheck className="h-3.5 w-3.5 text-zinc-500" />
-            <span>Pre-Configured Accounts</span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5 text-left">
-            <button
-              type="button"
-              onClick={() => handleFillDemo('participant@forge.internal')}
-              className="rounded border border-zinc-800 bg-zinc-950/50 p-1.5 text-[11px] hover:border-zinc-700 transition-colors"
-            >
-              <div className="font-semibold text-emerald-400">Participant</div>
-              <div className="text-zinc-500 truncate text-[10px]">participant@forge.internal</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleFillDemo('judge_a@forge.internal')}
-              className="rounded border border-zinc-800 bg-zinc-950/50 p-1.5 text-[11px] hover:border-zinc-700 transition-colors"
-            >
-              <div className="font-semibold text-sky-400">Judge</div>
-              <div className="text-zinc-500 truncate text-[10px]">judge_a@forge.internal</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleFillDemo('organizer@forge.internal')}
-              className="rounded border border-zinc-800 bg-zinc-950/50 p-1.5 text-[11px] hover:border-zinc-700 transition-colors"
-            >
-              <div className="font-semibold text-amber-400">Organizer</div>
-              <div className="text-zinc-500 truncate text-[10px]">organizer@forge.internal</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleFillDemo('admin@forge.internal')}
-              className="rounded border border-zinc-800 bg-zinc-950/50 p-1.5 text-[11px] hover:border-zinc-700 transition-colors"
-            >
-              <div className="font-semibold text-rose-400">Admin</div>
-              <div className="text-zinc-500 truncate text-[10px]">admin@forge.internal</div>
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-5 pt-4 border-t border-zinc-800/80 text-center">
+        <div className="mt-6 pt-4 border-t border-zinc-800/80 text-center">
           <p className="text-xs text-zinc-400">
             New participant?{' '}
             <Link to="/register" className="text-zinc-200 underline hover:text-white font-medium">

@@ -92,7 +92,7 @@ If configuring manually via the Render UI:
 
 1. **Verify Public Gallery**:
    Visit `https://<your-vercel-project>.vercel.app/projects`.
-   You should see all 6 seeded projects (e.g., *KubePulse*, *AegisDB*, *SpectraTrace*) loaded directly from your Render backend.
+   You should see all 6 seeded projects (e.g., *Prometheus*, *Excalidraw*, *Trivy*, *Ollama*) loaded directly from your Render backend.
 
 2. **Verify Single-Page Navigation**:
    Refresh the page on `https://<your-vercel-project>.vercel.app/dashboard` or `https://<your-vercel-project>.vercel.app/projects`.
