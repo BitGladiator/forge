@@ -38,9 +38,12 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Feature Pillars */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto mt-20 text-left">
-        <Card className="border-zinc-800 bg-zinc-900/40 p-6 space-y-3">
+      {/* Feature Pillars (Informational) */}
+      <section
+        aria-label="Platform capabilities"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto mt-20 text-left"
+      >
+        <Card className="border-zinc-800 bg-zinc-900/40 p-6 space-y-3 cursor-default select-text transition-colors duration-200 hover:border-zinc-700/70 hover:bg-zinc-900/60">
           <div className="flex h-10 w-10 items-center justify-center rounded border border-zinc-800 bg-zinc-900 text-zinc-300">
             <Layers className="h-5 w-5" />
           </div>
@@ -51,7 +54,7 @@ export const LandingPage: React.FC = () => {
           </p>
         </Card>
 
-        <Card className="border-zinc-800 bg-zinc-900/40 p-6 space-y-3">
+        <Card className="border-zinc-800 bg-zinc-900/40 p-6 space-y-3 cursor-default select-text transition-colors duration-200 hover:border-zinc-700/70 hover:bg-zinc-900/60">
           <div className="flex h-10 w-10 items-center justify-center rounded border border-zinc-800 bg-zinc-900 text-zinc-300">
             <CheckCircle2 className="h-5 w-5" />
           </div>
@@ -62,7 +65,7 @@ export const LandingPage: React.FC = () => {
           </p>
         </Card>
 
-        <Card className="border-zinc-800 bg-zinc-900/40 p-6 space-y-3">
+        <Card className="border-zinc-800 bg-zinc-900/40 p-6 space-y-3 cursor-default select-text transition-colors duration-200 hover:border-zinc-700/70 hover:bg-zinc-900/60">
           <div className="flex h-10 w-10 items-center justify-center rounded border border-zinc-800 bg-zinc-900 text-zinc-300">
             <Shield className="h-5 w-5" />
           </div>
@@ -72,7 +75,7 @@ export const LandingPage: React.FC = () => {
             export.
           </p>
         </Card>
-      </div>
+      </section>
     </div>
   );
 };

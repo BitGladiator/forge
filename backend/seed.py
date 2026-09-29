@@ -136,6 +136,12 @@ def seed_database(fixture_file: str = None, db_path: str = None):
                 VALUES (?, ?, ?, ?, 'active')
             """, (tid, p.get('team_name') or 'Team', f"{tid.upper()}-001", event_id))
 
+        team_name = p.get('team_name')
+        if tid:
+            t_row = conn.execute("SELECT name FROM teams WHERE id = ?", (tid,)).fetchone()
+            if t_row and t_row['name']:
+                team_name = t_row['name']
+
         conn.execute("""
             INSERT OR REPLACE INTO projects (
                 id, event_id, title, summary, description, track, team_id, team_name,
@@ -149,7 +155,7 @@ def seed_database(fixture_file: str = None, db_path: str = None):
             p.get('description'),
             p.get('track'),
             p.get('team_id'),
-            p.get('team_name'),
+            team_name,
             p.get('repository_url'),
             p.get('demo_url'),
             p.get('submission_status', 'draft'),

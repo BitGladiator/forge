@@ -248,16 +248,18 @@ def get_projects():
 
     conn = get_db_connection()
     query = """
-        SELECT id, event_id, title, summary, description, track, team_id, team_name,
-               repository_url, demo_url, submission_status, submitted_at, created_at, updated_at
-        FROM projects
+        SELECT p.id, p.event_id, p.title, p.summary, p.description, p.track, p.team_id,
+               COALESCE(t.name, p.team_name, 'Solo Participant') as team_name,
+               p.repository_url, p.demo_url, p.submission_status, p.submitted_at, p.created_at, p.updated_at
+        FROM projects p
+        LEFT JOIN teams t ON t.id = p.team_id
     """
     params = []
     if event_id:
-        query += " WHERE event_id = ?"
+        query += " WHERE p.event_id = ?"
         params.append(event_id)
 
-    query += " ORDER BY created_at DESC"
+    query += " ORDER BY p.created_at DESC"
     rows = conn.execute(query, params).fetchall()
     conn.close()
 
@@ -303,7 +305,14 @@ def get_projects():
 @app.route('/projects/<project_id>', methods=['GET'])
 def get_project_by_id(project_id):
     conn = get_db_connection()
-    r = conn.execute("SELECT * FROM projects WHERE id = ?", (project_id,)).fetchone()
+    r = conn.execute("""
+        SELECT p.id, p.event_id, p.title, p.summary, p.description, p.track, p.team_id,
+               COALESCE(t.name, p.team_name, 'Solo Participant') as team_name,
+               p.repository_url, p.demo_url, p.submission_status, p.submitted_at, p.created_at, p.updated_at
+        FROM projects p
+        LEFT JOIN teams t ON t.id = p.team_id
+        WHERE p.id = ?
+    """, (project_id,)).fetchone()
     conn.close()
 
     if not r:
@@ -338,9 +347,23 @@ def get_participant_project():
     conn = get_db_connection()
     row = None
     if user.get('team_id'):
-        row = conn.execute("SELECT * FROM projects WHERE team_id = ? LIMIT 1", (user['team_id'],)).fetchone()
+        row = conn.execute("""
+            SELECT p.id, p.event_id, p.title, p.summary, p.description, p.track, p.team_id,
+                   COALESCE(t.name, p.team_name, 'Solo Participant') as team_name,
+                   p.repository_url, p.demo_url, p.submission_status, p.submitted_at, p.created_at, p.updated_at
+            FROM projects p
+            LEFT JOIN teams t ON t.id = p.team_id
+            WHERE p.team_id = ? LIMIT 1
+        """, (user['team_id'],)).fetchone()
     if not row:
-        row = conn.execute("SELECT * FROM projects WHERE team_name = ? LIMIT 1", (user['name'],)).fetchone()
+        row = conn.execute("""
+            SELECT p.id, p.event_id, p.title, p.summary, p.description, p.track, p.team_id,
+                   COALESCE(t.name, p.team_name, 'Solo Participant') as team_name,
+                   p.repository_url, p.demo_url, p.submission_status, p.submitted_at, p.created_at, p.updated_at
+            FROM projects p
+            LEFT JOIN teams t ON t.id = p.team_id
+            WHERE p.team_name = ? OR t.name = ? LIMIT 1
+        """, (user['name'], user['name'])).fetchone()
     conn.close()
 
     if not row:
@@ -354,7 +377,7 @@ def get_participant_project():
         "description": row['description'] or "",
         "track": row['track'],
         "teamId": row['team_id'],
-        "teamName": row['team_name'] or user['name'],
+        "teamName": row['team_name'] or "Solo Participant",
         "repositoryUrl": row['repository_url'],
         "demoUrl": row['demo_url'],
         "submissionStatus": row['submission_status'],
@@ -394,6 +417,15 @@ def create_project():
             ev = conn.execute("SELECT id FROM events ORDER BY created_at ASC LIMIT 1").fetchone()
         event_id = ev['id'] if ev else 'evt_dogfood_2026'
 
+    team_id = user.get('team_id') or 'team_aurora'
+    team_name = None
+    if team_id:
+        t_row = conn.execute("SELECT name FROM teams WHERE id = ?", (team_id,)).fetchone()
+        if t_row and t_row['name']:
+            team_name = t_row['name']
+    if not team_name:
+        team_name = user.get('name') or 'Aurora Systems'
+
     conn.execute("""
         INSERT INTO projects (
             id, event_id, title, summary, description, track, team_id, team_name,
@@ -406,8 +438,8 @@ def create_project():
         data.get('summary', ''),
         data.get('description', ''),
         data.get('track', 'Infrastructure'),
-        user.get('team_id') or 'team_aurora',
-        user.get('name') or 'Aurora Systems',
+        team_id,
+        team_name,
         data.get('repositoryUrl', ''),
         data.get('demoUrl', ''),
         status,
@@ -508,14 +540,26 @@ def update_project(project_id):
         status = proj['submission_status']
         submitted_at = proj['submitted_at']
 
+    # Look up authoritative team name from teams table
+    team_id = proj['team_id']
+    team_name = None
+    if team_id:
+        t_row = conn.execute("SELECT name FROM teams WHERE id = ?", (team_id,)).fetchone()
+        if t_row and t_row['name']:
+            team_name = t_row['name']
+    if not team_name:
+        team_name = proj['team_name'] or 'Solo Participant'
+
     conn.execute("""
         UPDATE projects
         SET title = ?, summary = ?, description = ?, track = ?,
+            team_name = ?,
             repository_url = ?, demo_url = ?, submission_status = ?,
             submitted_at = ?, updated_at = ?
         WHERE id = ?
     """, (
         title, summary, description, track,
+        team_name,
         repository_url, demo_url, status,
         submitted_at, now_iso, project_id
     ))
@@ -530,7 +574,7 @@ def update_project(project_id):
         "description": description,
         "track": track,
         "teamId": proj['team_id'],
-        "teamName": proj['team_name'] or "Solo Participant",
+        "teamName": team_name,
         "repositoryUrl": repository_url,
         "demoUrl": demo_url,
         "submissionStatus": status,
@@ -727,10 +771,12 @@ def get_judge_assignments():
     conn = get_db_connection()
     rows = conn.execute("""
         SELECT a.id as assignment_id, a.status, a.assigned_at,
-               p.id as project_id, p.title, p.summary, p.description, p.track, p.team_name,
+               p.id as project_id, p.title, p.summary, p.description, p.track,
+               COALESCE(t.name, p.team_name, 'Solo Participant') as team_name,
                p.repository_url, p.demo_url, p.submission_status, p.submitted_at
         FROM judge_assignments a
         JOIN projects p ON p.id = a.project_id
+        LEFT JOIN teams t ON t.id = p.team_id
         WHERE a.judge_id = ?
     """, (user['id'],)).fetchall()
     conn.close()

@@ -44,6 +44,16 @@ def init_db(db_path: str = None):
             ensure_column('teams', 'event_id', 'TEXT REFERENCES events(id) ON DELETE CASCADE')
         if 'rubric_criteria' in tables:
             ensure_column('rubric_criteria', 'event_id', 'TEXT REFERENCES events(id) ON DELETE CASCADE')
+        if 'projects' in tables and 'teams' in tables:
+            try:
+                cursor.execute("""
+                    UPDATE projects
+                    SET team_name = (SELECT name FROM teams WHERE teams.id = projects.team_id)
+                    WHERE team_id IN (SELECT id FROM teams) AND team_id IS NOT NULL
+                """)
+                conn.commit()
+            except Exception:
+                pass
         if 'events' in tables:
             ensure_column('events', 'description', 'TEXT')
             ensure_column('events', 'start_date', 'TEXT')

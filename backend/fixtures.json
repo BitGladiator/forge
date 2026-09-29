@@ -71,6 +71,34 @@
           "role": "leader"
         }
       ]
+    },
+    {
+      "id": "team_spectra",
+      "name": "Spectra Lab",
+      "invite_code": "SPECTRA-101",
+      "leader_id": "usr_p5",
+      "members": []
+    },
+    {
+      "id": "team_voxel",
+      "name": "VoxelFlow Collective",
+      "invite_code": "VOXEL-202",
+      "leader_id": "usr_p6",
+      "members": []
+    },
+    {
+      "id": "team_bytebridge",
+      "name": "Kernel Crew",
+      "invite_code": "BYTE-303",
+      "leader_id": "usr_p7",
+      "members": []
+    },
+    {
+      "id": "team_sentinel",
+      "name": "Sentinel Systems",
+      "invite_code": "SENTINEL-404",
+      "leader_id": "usr_p8",
+      "members": []
     }
   ],
   "rubric": [
@@ -111,7 +139,7 @@
       "description": "Prometheus collects and stores metrics as time series data, providing high-dimensional data model queries via PromQL, autonomous single-node server reliability, and real-time alerting.",
       "track": "Infrastructure",
       "team_id": "team_aurora",
-      "team_name": "Team Prometheus",
+      "team_name": "Aurora Systems",
       "repository_url": "https://github.com/prometheus/prometheus",
       "demo_url": "https://prometheus.io",
       "submission_status": "submitted",
@@ -124,7 +152,7 @@
       "description": "Excalidraw is a versatile web-based drawing tool built in React and TypeScript. Features infinite canvas rendering, SVG/PNG export, local storage persistence, and shareable collaboration links.",
       "track": "Developer Tools",
       "team_id": "team_nexus",
-      "team_name": "Team Excalidraw",
+      "team_name": "Nexus Dynamics",
       "repository_url": "https://github.com/excalidraw/excalidraw",
       "demo_url": "https://excalidraw.com",
       "submission_status": "submitted",
@@ -137,7 +165,7 @@
       "description": "Trivy by Aqua Security scans container registries, virtual machine filesystems, and Kubernetes clusters. Evaluates package dependencies against authoritative vulnerability databases with instant CLI reporting.",
       "track": "Security",
       "team_id": "team_spectra",
-      "team_name": "Team AquaSec",
+      "team_name": "Spectra Lab",
       "repository_url": "https://github.com/aquasecurity/trivy",
       "demo_url": "https://trivy.dev",
       "submission_status": "submitted",
@@ -150,7 +178,7 @@
       "description": "Ollama bundles model weights, configurations, and datasets into a unified Modelfile. Features a high-performance REST API, OpenAI-compatible completion endpoints, and optimized GPU inference routines.",
       "track": "AI & Data",
       "team_id": "team_voxel",
-      "team_name": "Team Ollama",
+      "team_name": "VoxelFlow Collective",
       "repository_url": "https://github.com/ollama/ollama",
       "demo_url": "https://ollama.com",
       "submission_status": "submitted",
@@ -163,7 +191,7 @@
       "description": "Caddy simplifies production web serving and reverse proxying with concise Caddyfiles, dynamic JSON configuration APIs, zero-downtime reloads, and HTTP/3 support out of the box.",
       "track": "Infrastructure",
       "team_id": "team_bytebridge",
-      "team_name": "Team Caddy",
+      "team_name": "Kernel Crew",
       "repository_url": "https://github.com/caddyserver/caddy",
       "demo_url": "https://caddyserver.com",
       "submission_status": "under_review",
@@ -176,7 +204,7 @@
       "description": "HTTPie is designed for seamless debugging and interaction with HTTP services. Features simple headers, effortless file uploads, SSL support, and an interactive web playground for modern API workflows.",
       "track": "Developer Tools",
       "team_id": "team_sentinel",
-      "team_name": "Team HTTPie",
+      "team_name": "Sentinel Systems",
       "repository_url": "https://github.com/httpie/cli",
       "demo_url": "https://httpie.io",
       "submission_status": "submitted",
