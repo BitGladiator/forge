@@ -6,7 +6,7 @@ import sqlite3
 from datetime import datetime, timezone
 from flask import Flask, request, jsonify, Response, make_response
 from config import Config
-from database import get_db_connection
+from database import get_db_connection, init_db
 from auth import require_auth, get_current_user, hash_password, verify_password, generate_token
 from seed import seed_database
 from judging import calculate_results
@@ -37,8 +37,9 @@ def health_check():
 def options_handler(path=''):
     return Response(status=204)
 
-# Ensure database tables and fixtures are initialized on startup
+# Ensure database tables and schema migrations are initialized on startup
 try:
+    init_db()
     _conn = get_db_connection()
     _table_check = _conn.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='users'").fetchone()
     _conn.close()
@@ -460,6 +461,84 @@ def submit_project(project_id):
         "submittedAt": now_iso
     })
 
+@app.route('/api/projects/<project_id>', methods=['PUT'])
+@app.route('/projects/<project_id>', methods=['PUT'])
+@require_auth(roles=['participant', 'admin', 'organizer'])
+def update_project(project_id):
+    user = request.current_user
+    conn = get_db_connection()
+    proj = conn.execute("SELECT * FROM projects WHERE id = ?", (project_id,)).fetchone()
+    if not proj:
+        conn.close()
+        return jsonify({"error": f"Project with ID {project_id} not found", "status": 404}), 404
+
+    # Permission check: admin/organizer can update any, participant can update their own team's project
+    if user.get('role') not in ['admin', 'organizer']:
+        user_team_id = user.get('team_id')
+        user_name = user.get('name')
+        if user_team_id and proj['team_id'] != user_team_id:
+            conn.close()
+            return jsonify({"error": "Access denied. You do not own this project.", "status": 403}), 403
+        if not user_team_id and proj['team_name'] != user_name:
+            conn.close()
+            return jsonify({"error": "Access denied. You do not own this project.", "status": 403}), 403
+
+    data = request.get_json(force=True, silent=True) or {}
+    title = data.get('title', proj['title'])
+    if title is not None:
+        title = title.strip()
+    if not title:
+        conn.close()
+        return jsonify({"error": "Project title is required", "status": 400}), 400
+
+    summary = data.get('summary', proj['summary'] or '')
+    description = data.get('description', proj['description'] or '')
+    track = data.get('track', proj['track'] or 'Infrastructure')
+    repository_url = data.get('repositoryUrl', proj['repository_url'] or '')
+    demo_url = data.get('demoUrl', proj['demo_url'] or '')
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    # Submission status handling
+    if 'isDraft' in data:
+        is_draft = bool(data.get('isDraft'))
+        status = 'draft' if is_draft else 'submitted'
+        submitted_at = proj['submitted_at'] if is_draft else (proj['submitted_at'] or now_iso)
+    else:
+        status = proj['submission_status']
+        submitted_at = proj['submitted_at']
+
+    conn.execute("""
+        UPDATE projects
+        SET title = ?, summary = ?, description = ?, track = ?,
+            repository_url = ?, demo_url = ?, submission_status = ?,
+            submitted_at = ?, updated_at = ?
+        WHERE id = ?
+    """, (
+        title, summary, description, track,
+        repository_url, demo_url, status,
+        submitted_at, now_iso, project_id
+    ))
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "id": proj['id'],
+        "eventId": proj['event_id'],
+        "title": title,
+        "summary": summary,
+        "description": description,
+        "track": track,
+        "teamId": proj['team_id'],
+        "teamName": proj['team_name'] or "Solo Participant",
+        "repositoryUrl": repository_url,
+        "demoUrl": demo_url,
+        "submissionStatus": status,
+        "submittedAt": submitted_at,
+        "createdAt": proj['created_at'],
+        "updatedAt": now_iso
+    }), 200
+
 # -------------------------------------------------------------
 # 4. TEAMS
 # -------------------------------------------------------------
@@ -528,6 +607,113 @@ def join_team():
     conn.close()
 
     return jsonify({"success": True, "teamId": t['id'], "name": t['name']})
+
+@app.route('/api/participant/team', methods=['POST'])
+@app.route('/participant/team', methods=['POST'])
+@require_auth(roles=['participant', 'admin'])
+def create_team():
+    user = request.current_user
+    data = request.get_json(force=True, silent=True) or {}
+    name = data.get('name', '').strip()
+    if not name:
+        return jsonify({"error": "Team name is required", "status": 400}), 400
+
+    conn = get_db_connection()
+    team_id = f"team_{secrets_hex(6)}"
+    clean_name = "".join(c for c in name.upper() if c.isalnum())[:8] or "TEAM"
+    invite_code = f"{clean_name}-{secrets_hex(3).upper()}"
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    ev = conn.execute("SELECT id FROM events ORDER BY created_at DESC LIMIT 1").fetchone()
+    event_id = ev['id'] if ev else 'evt_dogfood_2026'
+
+    conn.execute("""
+        INSERT INTO teams (id, name, invite_code, event_id, status, created_at)
+        VALUES (?, ?, ?, ?, 'active', ?)
+    """, (team_id, name, invite_code, event_id, now_iso))
+
+    conn.execute("""
+        INSERT OR REPLACE INTO team_members (id, team_id, user_id, role, joined_at)
+        VALUES (?, ?, ?, 'leader', ?)
+    """, (f"{team_id}_{user['id']}", team_id, user['id'], now_iso))
+
+    conn.execute("UPDATE users SET team_id = ? WHERE id = ?", (team_id, user['id']))
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "id": team_id,
+        "name": name,
+        "inviteCode": invite_code,
+        "status": "active",
+        "createdAt": now_iso,
+        "members": [
+            {
+                "id": user['id'],
+                "name": user['name'],
+                "email": user['email'],
+                "role": "leader",
+                "joinedAt": now_iso
+            }
+        ]
+    }), 201
+
+@app.route('/api/participant/team/<team_id>/invite', methods=['POST'])
+@app.route('/participant/team/<team_id>/invite', methods=['POST'])
+@require_auth(roles=['participant', 'admin'])
+def invite_team_member(team_id):
+    user = request.current_user
+    conn = get_db_connection()
+    t = conn.execute("SELECT * FROM teams WHERE id = ?", (team_id,)).fetchone()
+    if not t:
+        conn.close()
+        return jsonify({"error": "Team not found", "status": 404}), 404
+
+    # Permission check: admin or member of the team
+    if user['role'] != 'admin':
+        member = conn.execute("SELECT * FROM team_members WHERE team_id = ? AND user_id = ?", (team_id, user['id'])).fetchone()
+        if not member and user.get('team_id') != team_id:
+            conn.close()
+            return jsonify({"error": "Access denied. You are not a member of this team.", "status": 403}), 403
+
+    data = request.get_json(force=True, silent=True) or {}
+    email = data.get('email', '').strip().lower()
+    if not email:
+        conn.close()
+        return jsonify({"error": "Email is required to invite a teammate", "status": 400}), 400
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    # Check if a user with this email already exists
+    invited_user = conn.execute("SELECT * FROM users WHERE LOWER(email) = ?", (email,)).fetchone()
+    if invited_user:
+        invited_uid = invited_user['id']
+        conn.execute("""
+            INSERT OR IGNORE INTO team_members (id, team_id, user_id, role, joined_at)
+            VALUES (?, ?, ?, 'member', ?)
+        """, (f"{team_id}_{invited_uid}", team_id, invited_uid, now_iso))
+        conn.execute("UPDATE users SET team_id = ? WHERE id = ?", (team_id, invited_uid))
+    else:
+        # Create a pending / invited participant account
+        new_uid = f"usr_{secrets_hex(6)}"
+        display_name = email.split('@')[0].replace('.', ' ').title()
+        conn.execute("""
+            INSERT INTO users (id, name, email, password_hash, role, token, team_id, created_at)
+            VALUES (?, ?, ?, ?, 'participant', ?, ?, ?)
+        """, (new_uid, display_name, email, hash_password('forge2026'), f"token_{new_uid}", team_id, now_iso))
+        conn.execute("""
+            INSERT INTO team_members (id, team_id, user_id, role, joined_at)
+            VALUES (?, ?, ?, 'member', ?)
+        """, (f"{team_id}_{new_uid}", team_id, new_uid, now_iso))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": f"Invitation successfully sent to {email}.",
+        "teamId": team_id,
+        "email": email
+    }), 200
 
 # -------------------------------------------------------------
 # 5. JUDGING & ISOLATION

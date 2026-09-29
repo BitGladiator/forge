@@ -51,6 +51,12 @@ def init_db(db_path: str = None):
             ensure_column('events', 'tracks', 'TEXT')
             ensure_column('events', 'prizes', 'TEXT')
             ensure_column('events', 'organizer_id', 'TEXT REFERENCES users(id) ON DELETE SET NULL')
+            ensure_column('events', 'updated_at', 'TEXT')
+            try:
+                cursor.execute("UPDATE events SET updated_at = created_at WHERE updated_at IS NULL")
+                conn.commit()
+            except Exception:
+                pass
     except Exception:
         pass
 

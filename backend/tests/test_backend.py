@@ -45,14 +45,14 @@ class ForgeBackendTestCase(unittest.TestCase):
         self.assertGreater(len(data), 0)
         # Check fixture project title present
         titles = [p['title'] for p in data]
-        self.assertTrue(any('KubePulse' in t for t in titles))
+        self.assertTrue(any('Prometheus' in t for t in titles))
 
     def test_project_detail_public(self):
         resp = self.client.get('/api/projects/proj_1')
         self.assertEqual(resp.status_code, 200)
         data = json.loads(resp.data.decode('utf-8'))
         self.assertEqual(data['id'], 'proj_1')
-        self.assertIn('KubePulse', data['title'])
+        self.assertIn('Prometheus', data['title'])
 
     # 2. Authentication tests
     def test_login_success(self):
@@ -186,6 +186,78 @@ class ForgeBackendTestCase(unittest.TestCase):
         # Invalid token is rejected on /api/auth/me
         bad_resp = self.client.get('/api/auth/me', headers={'Authorization': 'Bearer invalid_bogus_token'})
         self.assertEqual(bad_resp.status_code, 401)
+
+    # 7. Event Creation Tests (Organizer & Admin)
+    def test_organizer_and_admin_create_event(self):
+        # Organizer creating hackathon
+        org_resp = self.client.post('/api/organizer/events',
+            headers={'Authorization': f'Bearer {self.org_token}'},
+            json={
+                'name': 'Autumn Hackathon 2026',
+                'tagline': 'Building the future',
+                'description': 'Autumn 2026 systems challenge',
+                'tracks': ['AI', 'Systems'],
+                'prizes': [{'name': 'First', 'amount': '$5000', 'description': 'Grand prize'}]
+            }
+        )
+        self.assertEqual(org_resp.status_code, 201)
+        org_data = json.loads(org_resp.data.decode('utf-8'))
+        self.assertEqual(org_data['name'], 'Autumn Hackathon 2026')
+
+        # Admin creating hackathon
+        admin_token = 'forge_admin_token_2026'
+        adm_resp = self.client.post('/api/organizer/events',
+            headers={'Authorization': f'Bearer {admin_token}'},
+            json={
+                'name': 'Admin Platform Challenge',
+                'tagline': 'Platform level contest',
+                'description': 'Admin created hackathon',
+                'tracks': ['Core'],
+                'prizes': []
+            }
+        )
+        self.assertEqual(adm_resp.status_code, 201)
+
+    # 8. Participant Project Update Tests (PUT /projects/:id)
+    def test_participant_update_project(self):
+        resp = self.client.put('/api/projects/proj_1',
+            headers={'Authorization': f'Bearer {self.part_token}'},
+            json={
+                'title': 'Prometheus Enhanced Monitoring',
+                'summary': 'Updated summary description',
+                'description': 'Updated detailed architecture and documentation',
+                'track': 'Infrastructure',
+                'repositoryUrl': 'https://github.com/prometheus/prometheus',
+                'demoUrl': 'https://demo.promlabs.com',
+                'isDraft': False
+            }
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.data.decode('utf-8'))
+        self.assertEqual(data['id'], 'proj_1')
+        self.assertEqual(data['title'], 'Prometheus Enhanced Monitoring')
+        self.assertEqual(data['submissionStatus'], 'submitted')
+
+    # 9. Participant Team Invite & Creation Tests
+    def test_participant_team_create_and_invite(self):
+        # Create team
+        create_resp = self.client.post('/api/participant/team',
+            headers={'Authorization': f'Bearer {self.part_token}'},
+            json={'name': 'Vanguard Devs'}
+        )
+        self.assertEqual(create_resp.status_code, 201)
+        tdata = json.loads(create_resp.data.decode('utf-8'))
+        self.assertEqual(tdata['name'], 'Vanguard Devs')
+        team_id = tdata['id']
+
+        # Invite member
+        invite_resp = self.client.post(f'/api/participant/team/{team_id}/invite',
+            headers={'Authorization': f'Bearer {self.part_token}'},
+            json={'email': 'colleague@example.com'}
+        )
+        self.assertEqual(invite_resp.status_code, 200)
+        idata = json.loads(invite_resp.data.decode('utf-8'))
+        self.assertTrue(idata['success'])
 
 if __name__ == '__main__':
     unittest.main()
